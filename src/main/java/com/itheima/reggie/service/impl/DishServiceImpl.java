@@ -78,7 +78,33 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public boolean removeWithFlavorByIds(List<Long> ids) {
 
-        //获取要删除的dish们
+        /*
+        删除逻辑
+            启售：不删
+            停售：
+                有关联套餐：不删
+                无关联套餐：删
+         */
+
+        //判断是否（有）启售（的）
+        LambdaQueryWrapper<Dish> dishQueryWrapper = new LambdaQueryWrapper<>();
+        dishQueryWrapper.in(Dish::getId, ids).eq(Dish::getStatus, 1);
+        int count1 = this.count(dishQueryWrapper);
+        //（有）启售（的）不删，抛出异常
+        if (count1 > 0) {
+            throw new CustomException(ids.size() > 1 ? "删除失败：有未停售的菜品" : "删除失败：该菜品未停售");
+        }
+
+        //判断是否（有）关联了套餐（的）
+        LambdaQueryWrapper<SetmealDish> setmealDishQueryWrapper = new LambdaQueryWrapper<>();
+        setmealDishQueryWrapper.in(SetmealDish::getDishId, ids);
+        int count2 = setmealDishService.count(setmealDishQueryWrapper);
+        //（有）关联了套餐（的）不删，抛出异常
+        if (count2 > 0) {
+            throw new CustomException(ids.size() > 1 ? "删除失败：有关联了套餐的菜品" : "删除失败：该菜品有关联的套餐");
+        }
+
+        /*//获取要删除的dish们
         List<Dish> dishes = this.listByIds(ids);
         //遍历，判断是否有已启售或有关联套餐的
         dishes.forEach((dish -> {
@@ -86,7 +112,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             Integer status = dish.getStatus();
             //已启售则抛异常
             if (status == 1) {
-                throw new CustomException("删除失败，有正在售卖或关联了套餐的菜品，请检查");
+                throw new CustomException(ids.size() > 1 ? "删除失败：有未停售的菜品" : "删除失败：该菜品未停售");
             }
 
             //获取归属套餐的数量
@@ -95,10 +121,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             int count = setmealDishService.count(setmealDishQueryWrapper);
             //有归属套餐则抛异常
             if (count > 0) {
-                throw new CustomException("删除失败，有正在售卖或关联了套餐的菜品，请检查");
+                throw new CustomException(ids.size() > 1 ? "删除失败：有未停售的菜品" : "删除失败：该菜品未停售");
             }
-
-        }));
+        }));*/
 
         //删除dish表中数据
         boolean removed = this.removeByIds(ids);
@@ -164,6 +189,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     /**
      * 状态更新器
+     *
      * @param status
      * @param ids
      * @return

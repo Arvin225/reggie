@@ -2,6 +2,7 @@ package com.itheima.reggie.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -57,5 +58,6 @@ public class SetmealDish implements Serializable {
 
 
     //是否删除
+    @TableLogic
     private Integer isDeleted;
 }

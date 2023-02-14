@@ -3,7 +3,10 @@ package com.itheima.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
-import com.itheima.reggie.entity.*;
+import com.itheima.reggie.entity.Category;
+import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.SetmealDish;
+import com.itheima.reggie.entity.SetmealDto;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishService;
 import com.itheima.reggie.service.SetmealDishService;
@@ -11,10 +14,7 @@ import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +38,7 @@ public class SetmealController {
 
     /**
      * 套餐信息分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -46,8 +47,6 @@ public class SetmealController {
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(int page, int pageSize, String name) {
         Page<SetmealDto> setmealDtoPage = new Page<>();
-
-        SetmealDto setmealDto = new SetmealDto();
 
         //分页查询setmeal表，取出setmeal们，挨个拷贝到传输对象，再依据其categoryId查询category表，获得分类名，并设置进传输对象
         Page<Setmeal> setmealPage = new Page<>(page, pageSize);
@@ -61,6 +60,7 @@ public class SetmealController {
 
         List<Setmeal> setmealList = setmealPage.getRecords();
         List<SetmealDto> setmealDtoList = setmealList.stream().map((setmeal) -> {
+            SetmealDto setmealDto = new SetmealDto();
             BeanUtils.copyProperties(setmeal, setmealDto);
             Category category = categoryService.getById(setmeal.getCategoryId());
             setmealDto.setCategoryName(category.getName());
@@ -76,11 +76,12 @@ public class SetmealController {
 
     /**
      * 套餐信息回显
+     *
      * @param id
      * @return
      */
     @GetMapping("/{id}")
-    public R<SetmealDto> get(@PathVariable Long id){
+    public R<SetmealDto> get(@PathVariable Long id) {
         log.info("接收到套餐信息回显请求，id：{}", id);
 
         //setmeal
@@ -90,25 +91,90 @@ public class SetmealController {
         Category category = categoryService.getById(setmeal.getCategoryId());
         String categoryName = category.getName();
 
-        //dishList
+        //setmealDishList
         LambdaQueryWrapper<SetmealDish> setmealDishLambdaQueryWrapper = new LambdaQueryWrapper<>();
         setmealDishLambdaQueryWrapper.eq(SetmealDish::getSetmealId, id);
         List<SetmealDish> setmealDishList = setmealDishService.list(setmealDishLambdaQueryWrapper);
 
-        List<Long> dishIds = setmealDishList.stream().map((setmealDish -> {
+        /*List<Long> dishIds = setmealDishList.stream().map((setmealDish -> {
             Long dishId = setmealDish.getDishId();
             return dishId;
         })).collect(Collectors.toList());
 
-        List<Dish> dishList = dishService.listByIds(dishIds);
+        List<Dish> dishList = dishService.listByIds(dishIds);*/
 
         //setmealDto
         SetmealDto setmealDto = new SetmealDto();
         BeanUtils.copyProperties(setmeal, setmealDto);
         setmealDto.setCategoryName(categoryName);
-        setmealDto.setDishList(dishList);
+        setmealDto.setSetmealDishes(setmealDishList);
 
         return R.success(setmealDto);
+    }
+
+    /**
+     * 套餐新增
+     *
+     * @param setmealDto
+     * @return
+     */
+    @PostMapping
+    public R<Object> add(@RequestBody SetmealDto setmealDto) {
+        log.info("接收到套餐新增请求，套餐名称：{}", setmealDto.getName());
+
+        boolean saved = setmealService.saveWithSetmealDish(setmealDto);
+        if (!saved) {
+            return R.error("异常，新增失败");
+        }
+        return R.success("新增成功");
+    }
+
+    /**
+     * 套餐修改
+     *
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    public R<Object> update(@RequestBody SetmealDto setmealDto) {
+        log.info("接收到套餐修改请求，套餐id：{}", setmealDto.getId());
+
+        boolean updated = setmealService.updateWithSetmealDish(setmealDto);
+        if (!updated) {
+            return R.error("异常，修改失败");
+        }
+
+        return R.success("修改成功");
+    }
+
+    @PostMapping("/status/{status}")
+    public R<Object> status(@PathVariable int status, @RequestParam("ids") List<Long> ids) {
+        log.info("接收到套餐停/启售请求，id：{}", ids);
+
+        boolean updated = setmealService.statusUpdate(status, ids);
+        if (!updated) {
+            return R.error("异常，停/启售失败");
+        }
+
+        return R.success("停/启售成功");
+    }
+
+    /**
+     * 套餐删除
+     *
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<Object> delete(@RequestParam("ids") List<Long> ids) {
+        log.info("接收到套餐删除请求，id：{}", ids);
+
+        boolean removed = setmealService.removeWithSetmealDish(ids);
+        if (!removed) {
+            return R.error("异常，删除失败");
+        }
+
+        return R.success("删除成功");
     }
 
 }

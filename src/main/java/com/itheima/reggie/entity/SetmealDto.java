@@ -8,5 +8,5 @@ import java.util.List;
 public class SetmealDto extends Setmeal{
     public String categoryName;
 
-    public List<Dish> dishList;
+    public List<SetmealDish> SetmealDishes;
 }

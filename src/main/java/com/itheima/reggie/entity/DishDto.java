@@ -9,8 +9,10 @@ import java.util.List;
  */
 @Data
 public class DishDto extends Dish{ //继承Dish，获得其所有属性，用于封装Dish表数据
-    public String categoryName;
+    private String categoryName;
 
-    public List<DishFlavor> flavors;
+    private List<DishFlavor> flavors;
+
+    private Integer copies;
 
 }
