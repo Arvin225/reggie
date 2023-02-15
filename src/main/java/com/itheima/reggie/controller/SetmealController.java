@@ -147,6 +147,13 @@ public class SetmealController {
         return R.success("修改成功");
     }
 
+    /**
+     * 套餐停/启售
+     *
+     * @param status
+     * @param ids
+     * @return
+     */
     @PostMapping("/status/{status}")
     public R<Object> status(@PathVariable int status, @RequestParam("ids") List<Long> ids) {
         log.info("接收到套餐停/启售请求，id：{}", ids);
@@ -175,6 +182,22 @@ public class SetmealController {
         }
 
         return R.success("删除成功");
+    }
+
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
+        log.info("接收到套餐分类查询请求：{}", setmeal.toString());
+
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Setmeal::getCategoryId, setmeal.getCategoryId()).
+                eq(Setmeal::getStatus, setmeal.getStatus());
+        List<Setmeal> setmealList = setmealService.list(queryWrapper);
+
+        if (setmealList.isEmpty()){
+            R.error("无数据");
+        }
+
+        return R.success(setmealList);
     }
 
 }

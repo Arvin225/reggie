@@ -41,8 +41,10 @@ public class LoginCheckFilter implements Filter {
         String[] urls = {
                 "/employee/login",
                 "/employee/logout",
+                "/user/login",
+                "/user/logout",
                 "/backend/**",
-                "/front",
+                "/front/**",
                 "/common/**"
         };
         //1.2判断接收的请求路径是否匹配以上url，是则放行
@@ -53,12 +55,23 @@ public class LoginCheckFilter implements Filter {
             return;
         }
 
-        //2.对已登录放行
-        if (request.getSession().getAttribute("employee") != null) {//获取session中的用户，判断是否为空，不为空则已登录
-            log.info("登录状态，已放行...");
+        //2.1 后台对已登录放行
+        if (request.getSession().getAttribute("employee") != null) {//获取session中的员工，判断是否为空，不为空则已登录
+            log.info("员工登录状态，已放行...");
 
             //将登录人的id存入Thread的局部变量中，供后续同一线程的其他程序使用
             BaseContext.setCurrentUser((Long) request.getSession().getAttribute("employee"));
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        //2.2 移动端对已登录放行
+        if (request.getSession().getAttribute("user") != null) {//获取session中的用户，判断是否为空，不为空则已登录
+            log.info("用户登录状态，已放行...");
+
+            //将登录人的id存入Thread的局部变量中，供后续同一线程的其他程序使用
+            BaseContext.setCurrentUser((Long) request.getSession().getAttribute("user"));
 
             filterChain.doFilter(request, response);
             return;

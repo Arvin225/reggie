@@ -194,21 +194,40 @@ public class DishController {
 
     /**
      * 菜品列表查询
+     *
      * @param dish
      * @return
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish) {
+    public R<List<DishDto>> list(Dish dish) {
         log.info("接收到菜品列表查询请求...");
 
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
 
-        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
+                .eq(dish.getStatus() != null, Dish::getStatus, dish.getStatus());
         queryWrapper.like(dish.getName() != null, Dish::getName, dish.getName());
 
         List<Dish> dishList = dishService.list(queryWrapper);
 
-        return R.success(dishList);
+
+        List<DishDto> dishDtoList = dishList.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+
+            BeanUtils.copyProperties(item, dishDto);
+
+            if (dish.getStatus() != null) {//提交过来的status有值说明是移动端的请求，此时将口味一并查询并封装
+                LambdaQueryWrapper<DishFlavor> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(DishFlavor::getDishId, item.getId());
+                List<DishFlavor> flavorList = dishFlavorService.list(wrapper);
+
+                dishDto.setFlavors(flavorList);
+            }
+
+            return dishDto;
+        }).collect(Collectors.toList());
+
+        return R.success(dishDtoList);
     }
 
 

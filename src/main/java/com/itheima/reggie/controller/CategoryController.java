@@ -4,11 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
-import com.itheima.reggie.entity.Dish;
-import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.CategoryService;
-import com.itheima.reggie.service.DishService;
-import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -100,17 +96,17 @@ public class CategoryController {
      * @return
      */
     @GetMapping("/list")
-    public R<List<Category>> list(int type) {
-        log.info("接收到分类查询list请求，type={}", type);
+    public R<List<Category>> list(Category category) {
+        log.info("接收到分类查询list请求，type={}", category.getType());
 
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Category::getType, type);
+        queryWrapper.eq(category.getType() != null, Category::getType, category.getType());
         queryWrapper.orderByAsc(Category::getSort);
 
         List<Category> categories = categoryService.list(queryWrapper);
 
         if (categories.isEmpty()) {
-            R.error("未找到该类别的数据");
+            R.error(category.getType() != null ? "未找到该类别的数据" : "未找到任何分类信息");
         }
 
         return R.success(categories);
