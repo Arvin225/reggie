@@ -154,7 +154,11 @@ public class ShoppingCartController {
 
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentUser());
-        shoppingCartService.remove(queryWrapper);
+        boolean removed = shoppingCartService.remove(queryWrapper);
+
+        if (!removed){
+            return R.error("异常，清空失败");
+        }
 
         return R.success("清空购物车成功");
     }
