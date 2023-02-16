@@ -7,6 +7,7 @@ import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
 import com.itheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +36,7 @@ public class UserController {
     public R<Object> sendMsg(@RequestBody User user, HttpServletRequest request) {
         String phone = user.getPhone();
         log.info("接收到 {} 的短信验证码发送请求", phone);
-        if (phone == null) {
+        if (StringUtils.isEmpty(phone)) {
             return R.error("验证码发送失败");
         }
 
@@ -56,13 +57,13 @@ public class UserController {
         log.info("接收到用户登录请求，手机号：{}，验证码：{}", phone, code);
 
         //判空，响应失败
-        if (phone == null || code == null) {
+        if (StringUtils.isEmpty(phone) || StringUtils.isNotEmpty(code)) {
             return R.error("手机号或验证码不能为空");
         }
 
         //验证码核对
         //错误，响应验证码错误，提示重试
-        if (request.getSession().getAttribute(phone) == null
+        if (StringUtils.isEmpty(request.getSession().getAttribute(phone).toString())
                 || !code.equals(request.getSession().getAttribute(phone))) {
 
             return R.error("验证码错误");

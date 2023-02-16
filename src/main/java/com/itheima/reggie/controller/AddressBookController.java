@@ -7,6 +7,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.AddressBook;
 import com.itheima.reggie.service.AddressBookService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +69,7 @@ public class AddressBookController {
     @PutMapping("/default")
     public R<Object> defaultAddress(@RequestBody AddressBook addressBook){
         log.info("接收到地址默认设置请求，id：{}", addressBook.getId());
-        if (addressBook.getId() == null){
+        if (StringUtils.isEmpty(addressBook.getId().toString())){
             return R.error("错误，请检查参数是否有效");
         }
 

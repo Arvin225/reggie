@@ -92,7 +92,7 @@ public class CategoryController {
     /**
      * 查询菜品或套餐分类下的所有数据（根据type区分）
      *
-     * @param type
+     * @param category
      * @return
      */
     @GetMapping("/list")

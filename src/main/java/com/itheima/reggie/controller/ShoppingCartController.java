@@ -7,6 +7,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +50,7 @@ public class ShoppingCartController {
         log.info("接收到添加购物车请求，添加的菜品或套餐信息：{}", shoppingCart.toString());
 
         //判空
-        if (shoppingCart.getDishId() == null && shoppingCart.getSetmealId() == null) {
+        if (StringUtils.isEmpty(shoppingCart.getDishId().toString()) && StringUtils.isEmpty(shoppingCart.getSetmealId().toString())) {
             return R.error("错误，请检查参数是否有效");
         }
 
@@ -93,7 +94,7 @@ public class ShoppingCartController {
         log.info("接收到移除购物车请求，移除的套餐或菜品信息：{}", shoppingCart.toString());
 
         //判空
-        if (shoppingCart.getDishId() == null && shoppingCart.getSetmealId() == null) {
+        if (StringUtils.isEmpty(shoppingCart.getDishId().toString()) && StringUtils.isEmpty(shoppingCart.getSetmealId().toString())) {
             return R.error("异常，请检查参数是否有效");
         }
 

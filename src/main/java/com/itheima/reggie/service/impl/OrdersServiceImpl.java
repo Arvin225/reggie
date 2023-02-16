@@ -14,6 +14,7 @@ import com.itheima.reggie.service.AddressBookService;
 import com.itheima.reggie.service.OrderDetailService;
 import com.itheima.reggie.service.OrdersService;
 import com.itheima.reggie.service.ShoppingCartService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -101,10 +102,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setConsignee(addressBook.getConsignee());//收货人
         order.setPhone(addressBook.getPhone());//手机号
         //地址拼接，为空则拼接一个空的字符串，否则会填充“Null”
-        String address = (addressBook.getProvinceName() == null ? "" : addressBook.getProvinceName())
-                + (addressBook.getCityName() == null ? "" : addressBook.getCityName())
-                + (addressBook.getDistrictName() == null ? "" : addressBook.getDistrictName())
-                + (addressBook.getDetail() == null ? "" : addressBook.getDetail());
+        String address = (StringUtils.isEmpty(addressBook.getProvinceName()) ? "" : addressBook.getProvinceName())
+                + (StringUtils.isEmpty(addressBook.getCityName()) ? "" : addressBook.getCityName())
+                + (StringUtils.isEmpty(addressBook.getDistrictName()) ? "" : addressBook.getDistrictName())
+                + (StringUtils.isEmpty(addressBook.getDetail()) ? "" : addressBook.getDetail());
         order.setAddress(address);//收货地址
         //5.2 其他数据
         order.setUserId(userId);//用户id
