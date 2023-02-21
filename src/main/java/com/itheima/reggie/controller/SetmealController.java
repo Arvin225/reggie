@@ -13,6 +13,8 @@ import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -115,6 +117,7 @@ public class SetmealController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "setmealCache", key = "#setmealDto.categoryId")
     public R<Object> add(@RequestBody SetmealDto setmealDto) {
         log.info("接收到套餐新增请求，套餐名称：{}", setmealDto.getName());
 
@@ -132,6 +135,7 @@ public class SetmealController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "setmealCache", key = "#setmealDto.categoryId")
     public R<Object> update(@RequestBody SetmealDto setmealDto) {
         log.info("接收到套餐修改请求，套餐id：{}", setmealDto.getId());
 
@@ -151,6 +155,7 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<Object> status(@PathVariable int status, @RequestParam("ids") List<Long> ids) {
         log.info("接收到套餐停/启售请求，id：{}", ids);
 
@@ -186,6 +191,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId")
     public R<List<Setmeal>> list(Setmeal setmeal) {
         log.info("接收到套餐分类查询请求：{}", setmeal.toString());
 

@@ -24,6 +24,7 @@ public class ShoppingCartController {
 
     /**
      * 购物车查询
+     *
      * @return
      */
     @GetMapping("/list")
@@ -42,6 +43,7 @@ public class ShoppingCartController {
 
     /**
      * 购物车菜品或套餐份数加一
+     *
      * @param shoppingCart
      * @return
      */
@@ -50,7 +52,7 @@ public class ShoppingCartController {
         log.info("接收到添加购物车请求，添加的菜品或套餐信息：{}", shoppingCart.toString());
 
         //判空
-        if (StringUtils.isEmpty(shoppingCart.getDishId().toString()) && StringUtils.isEmpty(shoppingCart.getSetmealId().toString())) {
+        if (shoppingCart.getDishId() == null && shoppingCart.getSetmealId() == null) {
             return R.error("错误，请检查参数是否有效");
         }
 
@@ -86,6 +88,7 @@ public class ShoppingCartController {
 
     /**
      * 购物车菜品或套餐份数减一
+     *
      * @param shoppingCart
      * @return
      */
@@ -147,6 +150,7 @@ public class ShoppingCartController {
 
     /**
      * 清空购物车
+     *
      * @return
      */
     @DeleteMapping("/clean")
@@ -157,7 +161,7 @@ public class ShoppingCartController {
         queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentUser());
         boolean removed = shoppingCartService.remove(queryWrapper);
 
-        if (!removed){
+        if (!removed) {
             return R.error("异常，清空失败");
         }
 

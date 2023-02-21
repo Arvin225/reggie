@@ -13,6 +13,8 @@ import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -128,6 +130,7 @@ public class DishController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<Object> update(@RequestBody DishDto dishDto) {
         log.info("接收到菜品信息更新请求，菜品id：{}", dishDto.getId());
 
@@ -146,6 +149,7 @@ public class DishController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "dishCache", key = "#dishDto.categoryId")
     public R<Object> add(@RequestBody DishDto dishDto) {
         log.info("接收到菜品新增请求，菜品名称：{}", dishDto.getName());
         boolean saved = dishService.saveWithFlavor(dishDto);
@@ -181,6 +185,7 @@ public class DishController {
      * @return
      */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<Object> status(@PathVariable int status, @RequestParam("ids") List<Long> ids) {
         log.info("接收到菜品停启售请求，status：{}，id：{}", status, ids);
 
@@ -199,6 +204,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
+    @Cacheable(value = "dishCache", key = "#dish.categoryId")
     public R<List<DishDto>> list(Dish dish) {
         log.info("接收到菜品列表查询请求...");
 
