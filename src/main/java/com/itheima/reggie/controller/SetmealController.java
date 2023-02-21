@@ -8,7 +8,6 @@ import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.entity.SetmealDto;
 import com.itheima.reggie.service.CategoryService;
-import com.itheima.reggie.service.DishService;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +31,6 @@ public class SetmealController {
 
     @Autowired
     private SetmealDishService setmealDishService;
-
-    @Autowired
-    private DishService dishService;
 
     /**
      * 套餐信息分页查询
@@ -184,6 +180,11 @@ public class SetmealController {
         return R.success("删除成功");
     }
 
+    /**
+     * 套餐分类查询
+     * @param setmeal
+     * @return
+     */
     @GetMapping("/list")
     public R<List<Setmeal>> list(Setmeal setmeal) {
         log.info("接收到套餐分类查询请求：{}", setmeal.toString());

@@ -1,6 +1,7 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.entity.*;
@@ -9,6 +10,7 @@ import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,10 +49,21 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         flavors.forEach((flavor) -> {
             flavor.setDishId(dishDto.getId());
         });
-
         //2.2.2 插入（这里批量插入）
-        boolean savedOrNot = dishFlavorService.saveBatch(flavors);
-        return savedOrNot;
+        boolean saved = dishFlavorService.saveBatch(flavors);
+        if (!saved){
+            return false;
+        }
+
+        //3.更新setmeal_dish表
+        LambdaUpdateWrapper<SetmealDish> setmealDishUpdateWrapper = new LambdaUpdateWrapper<>();
+        setmealDishUpdateWrapper.eq(SetmealDish::getDishId, dishDto.getId()); //以dishId为更新依据
+        //创建一个SetmealDish对象，将dishDto中可以拷贝的属性（共有属性）的值拷贝过来，作为更新内容
+        SetmealDish setmealDish = new SetmealDish();
+        BeanUtils.copyProperties(dishDto, setmealDish);//拷贝，若不行只能一个个获取一个个封装
+
+        boolean updatedOrNot = setmealDishService.update(setmealDish, setmealDishUpdateWrapper);
+        return updatedOrNot;
     }
 
     @Override
