@@ -51,11 +51,20 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         });
         //2.2.2 插入（这里批量插入）
         boolean saved = dishFlavorService.saveBatch(flavors);
-        if (!saved){
+        if (!saved) {
             return false;
         }
 
         //3.更新setmeal_dish表
+        //3.1判断菜品是否有关联套餐，无则不更新此表
+        LambdaQueryWrapper<SetmealDish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SetmealDish::getDishId, dishDto.getId());
+        int count = setmealDishService.count(wrapper);
+        if (count < 1) {
+            return true;
+        }
+
+        //3.2有则更表
         LambdaUpdateWrapper<SetmealDish> setmealDishUpdateWrapper = new LambdaUpdateWrapper<>();
         setmealDishUpdateWrapper.eq(SetmealDish::getDishId, dishDto.getId()); //以dishId为更新依据
         //创建一个SetmealDish对象，将dishDto中可以拷贝的属性（共有属性）的值拷贝过来，作为更新内容
