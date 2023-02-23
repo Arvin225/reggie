@@ -46,7 +46,12 @@ public class LoginCheckFilter implements Filter {
                 "/user/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
         //1.2判断接收的请求路径是否匹配以上url，是则放行
         Boolean check = urlMatcher(request.getRequestURI(), urls);
